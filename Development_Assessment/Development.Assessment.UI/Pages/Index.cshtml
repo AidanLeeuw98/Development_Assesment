@@ -1,0 +1,509 @@
+﻿@page
+@model IndexModel
+@{
+    Layout = null;
+}
+
+@{
+    await Model.OnGetAsync();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <title>Master-Detail Grids</title>
+    <style>
+        .arrow-icon {
+            transition: transform 0.3s ease;
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 5px;
+            vertical-align: middle;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            border-left: 4px solid;
+        }
+
+            .arrow-icon.collapsed {
+                transform: rotate(-90deg);
+            }
+
+        .details-control {
+            cursor: pointer;
+        }
+
+        .inner-table {
+            width: 100%;
+            margin: 10px 0;
+            border-collapse: collapse;
+        }
+
+            .inner-table th, .inner-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-4">
+        <ul class="nav nav-tabs" id="masterTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="userTab" data-toggle="tab" href="#userContent">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="groupTab" data-toggle="tab" href="#groupContent">Groups</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="groupTab" data-toggle="tab" href="#permissionContent">Permissions</a>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3">
+            <!-- Users Tab -->
+            <div class="tab-pane fade show active" id="userContent">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success mb-2" data-toggle="modal" data-target="#addUserModal">Add User</button>
+                        <table id="userTable" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Id</th>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Users)
+                                {
+                                    <tr>
+                                        <td class="details-control">
+                                            <span class="arrow-icon"></span>
+                                        </td>
+                                        <td>@item.UserId</td>
+                                        <td>@item.UserName</td>
+                                        <td>@item.Email</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-user" data-toggle="modal" data-target="#editUserModal">Edit</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div class="tab-pane fade" id="groupContent">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success mb-2" data-toggle="modal" data-target="#addGroupModal">Add Group</button>
+                        <table id="groupTable" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Id</th>
+                                    <th>Group</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Groups)
+                                {
+                                    <tr>
+                                        <td class="details-control">
+                                            <span class="arrow-icon"></span>
+                                        </td>
+                                        <td>@item.GroupId</td>
+                                        <td>@item.GroupName</td>
+                                        <td>@item.GroupDescription</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-group" data-toggle="modal" data-target="#editGroupModal">Edit</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div class="tab-pane fade" id="permissionContent">
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-success mb-2" data-toggle="modal" data-target="#addGroupModal">Add Group</button>
+                        <table id="groupTable" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Permissions)
+                                {
+                                    <tr>
+                                        <td>@item.PermissionId</td>
+                                        <td>@item.PermissionName</td>
+                                        <td>@item.PermissionDescription</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary edit-group" data-toggle="modal" data-target="#editGroupModal">Edit</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modals -->
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="addUsername">Username</label>
+                            <input type="text" class="form-control" id="addUsername" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label for="addEmail">Email</label>
+                            <input type="email" class="form-control" id="addEmail" placeholder="Enter email">
+                        </div>
+                        <div class="form-group">
+                            <label for="adduserGroups">Groups</label>
+                            <select multiple class="form-control" id="adduserGroups">
+                                @foreach (var item in Model.Groups)
+                                {
+                                    <option>@item.GroupName</option>
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addUserBtn">Add User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="editUserId">User ID</label>
+                            <input type="text" class="form-control" id="editUserId" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="editUserName">User Name</label>
+                            <input type="text" class="form-control" id="editUsername">
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" class="form-control" id="editEmail" value="user1@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="edituserGroups">Groups</label>
+                            <select multiple class="form-control" id="edituserGroups">
+                                @foreach (var item in Model.Groups)
+                                {
+                                    <option>@item.GroupName</option>
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveUserChangesBtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Group Modal -->
+    <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="addGroupName">Group Name</label>
+                            <input type="text" class="form-control" id="addGroupName" placeholder="Enter group name">
+                            <label for="addGroupDescription">Enter group description</label>
+                            <input type="text" class="form-control" id="addGroupDescription" placeholder="Enter group description">
+                        </div>
+                        <label for="addGroupPermissions">Permissions</label>
+                        <select multiple class="form-control" id="addGroupPermissions">
+                            @foreach (var item in Model.Permissions)
+                            {
+                                <option>@item.PermissionName</option>
+                            }
+                        </select>
+                        <!-- Add more fields as needed -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addGroupBtn">Add Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1" role="dialog" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editGroupModalLabel">Edit Group</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="editGroupId">Group Name</label>
+                            <input type="text" class="form-control" id="editGroupId" placeholder="Enter group name" readonly>
+                            <label for="editGroupName">Group Name</label>
+                            <input type="text" class="form-control" id="editGroupName" placeholder="Enter group name">
+                            <label for="editGroupDescription">Enter group description</label>
+                            <input type="text" class="form-control" id="editGroupDescription" placeholder="Enter group description">
+                        </div>
+                        <label for="editGroupPermissions">Permissions</label>
+                        <select multiple class="form-control" id="editGroupPermissions">
+                            @foreach (var item in Model.Permissions)
+                            {
+                                <option>@item.PermissionName</option>
+                            }
+                        </select>
+                        <!-- edit more fields as needed -->
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveGroupChangesBtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+    <script>
+
+        $('.edit-user').on('click', function () {
+            var row = $(this).closest('tr');
+            var userId = row.find('td:eq(1)').text();
+            var username = row.find('td:eq(2)').text();
+            var email = row.find('td:eq(3)').text();
+
+            $('#editUserId').val(userId);
+            $('#editUsername').val(username);
+            $('#editEmail').val(email);
+            $('#editUserModal').modal('show');
+        });
+
+        $('.edit-group').on('click', function () {
+            var row = $(this).closest('tr');
+            var Id = row.find('td:eq(1)').text();
+            var name = row.find('td:eq(2)').text();
+            var description = row.find('td:eq(3)').text();
+
+            $('#editGroupId').val(Id);
+            $('#editGroupName').val(name);
+            $('#editGroupDescription').val(description);
+            $('#editGroupModal').modal('show');
+        });
+
+        $(document).ready(function () {
+            var userTable = $('#userTable').DataTable({
+                paging: false,
+                columnDefs: [
+                    {
+                        targets: [0],
+                        orderable: false,
+                    }
+                ]
+            });
+
+            $('#userTable tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = userTable.row(tr);
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    showUserDetails(row, tr);
+                    tr.addClass('shown');
+                }
+            });
+
+            var groupTable = $('#groupTable').DataTable({
+                paging: false,
+                columnDefs: [
+                    {
+                        targets: [0],
+                        orderable: false,
+                    }
+                ]
+            });
+
+            $('#groupTable tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = groupTable.row(tr);
+
+                if (row.child.isShown()) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    showGroupDetails(row, tr);
+                    tr.addClass('shown');
+                }
+            });
+
+            function showUserDetails(row, tr) {
+                var userData = row.data();
+
+                var userId = userData[1];
+                var jsonData = @Html.Raw(Json.Serialize(Model.Users))
+                                         var user = jsonData.find(function (u) {
+                    return u.userId == userId;
+                });
+                row.child(formatUserGroups(user.groups)).show();
+            }
+
+
+            function formatUserGroups(userGroups) {
+                var table = '<table class="inner-table">' +
+                    '<thead><tr><th>Group Name</th><th>Description</th></tr></thead>' +
+                    '<tbody>';
+                for (var i = 0; i < userGroups.length; i++) {
+                    table += '<tr><td>' + userGroups[i].groupName + '</td><td>' + userGroups[i].groupDescription + '</td></tr>';
+                }
+                table += '</tbody></table>';
+
+                return table;
+            }
+
+            function showGroupDetails(row, tr) {
+                var groupData = row.data();
+                var groupId = groupData[1];
+                var jsonData = @Html.Raw(Json.Serialize(Model.Groups));
+                var group = jsonData.find(function (u) {
+                    return u.groupId == groupId;
+                });
+                row.child(formatGroupPermissions(group.permissions)).show();
+            }
+
+            function formatGroupPermissions(groupPermissions) {
+                var table = '<table class="inner-table">' +
+                    '<thead><tr><th>Name</th><th>Description</th></tr></thead>' +
+                    '<tbody>';
+
+                for (var i = 0; i < groupPermissions.length; i++) {
+                    table += '<tr><td>' + groupPermissions[i].permissionName + '</td><td>' + groupPermissions[i].permissionDescription + '</td></tr>';
+                }
+
+                table += '</tbody></table>';
+
+                return table;
+            }
+        });
+        $('#saveUserChangesBtn').on('click', function () {
+            var userId = $('#editUserId').val();
+            var username = $('#editUsername').val();
+            var email = $('#editEmail').val();
+
+            var selectedGroups = $('#edituserGroups').val();
+            var groups = @Html.Raw(Json.Serialize(Model.Groups));
+            var requestData = {
+                UserId: userId,
+                UserName: username,
+                Email: email,
+                Groups: selectedGroups.map(function (groupName) {
+                    var matchingGroups = groups.filter(function (group) {
+                        return group.groupName == groupName;
+                    });
+                    return matchingGroups; 
+                })
+            }
+
+            var test = JSON.stringify(requestData);
+
+        $.ajax({
+                url: 'https://localhost:7051/Operations/Update?service=User',
+            type: 'PUT',
+            contentType: 'application/json',
+            data: requestData,
+            success: function (response) {
+                var table = $('#userTable').DataTable();
+                var row = table.row('#rowId-' + userId);
+                var rowData = [
+                    '',
+                    userId,
+                    username,
+                    email,
+                    '<button class="btn btn-sm btn-primary edit-user" data-toggle="modal" data-target="#editUserModal">Edit</button>'
+                ];
+                row.data(rowData).draw();
+
+                $('#editUserModal').modal('hide');
+            },
+            error: function (error) {
+                console.error('Error updating user data:', error);
+                alert('Error updating user data:' + error);
+            }
+        });
+                });
+
+    </script>
+
+</body>
+</html>
